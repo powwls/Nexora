@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Workspace {
+  id        String   @id
+  workspace String
+  event     String
+  status    String
+  volume    String
+  updated   DateTime @default(now())
+
+  @@map("workspaces")
+}

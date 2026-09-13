@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Main colors used by the Nexora dashboard. */
+:root {
+  --ink: #101a38;
+  --muted: #7b849b;
+  --line: #e4e8f1;
+  --canvas: #f5f7fb;
+  --blue: #5960f2;
+  --blue-dark: #0e1838;
+  --cyan: #32cfb0;
+  --orange: #ff9868;
+}
+
+* {
+  box-sizing: border-box;
+}
+/* Global page defaults. Component-specific styles stay in app/page.tsx. */
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-geist), sans-serif;
+}
+button,
+input {
+  font: inherit;
+}
+::selection {
+  background: #c9d2ff;
+  color: var(--ink);
+}
+
+/* Reusable visual styles referenced by the dashboard JSX. */
+.grid-paper {
+  background: #f5f7fb;
+}
+.sidebar-glow {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(84, 95, 236, 0.18), transparent 34%),
+    #0e1838;
+}
+.logo-mark {
+  background: linear-gradient(135deg, #38bdf8, #5b42eb 72%);
+  box-shadow: 0 5px 14px rgba(58, 79, 235, 0.32);
+}
+.panel-shadow {
+  box-shadow: 0 8px 24px rgba(30, 44, 83, 0.055);
+}
+
+.login-grid {
+  background-image: linear-gradient(rgba(142, 157, 222, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(142, 157, 222, 0.12) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom right, black, transparent 70%);
+}
+
+.fade-up {
+  animation: fade-up 0.65s ease-out both;
+}
+.fade-up-delay {
+  animation: fade-up 0.65s 0.12s ease-out both;
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
