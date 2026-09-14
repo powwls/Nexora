@@ -1,7 +1,3 @@
-import {
-  CheckCircle2,
-  Database,
-} from "lucide-react";
 import { Suspense } from "react";
 import {
   Box,
@@ -27,6 +23,7 @@ import CrudTable from "@/components/CrudTable";
 import NotificationBell from "@/components/NotificationBell";
 import SearchField from "@/components/SearchField";
 import UserProfile from "@/components/UserProfile";
+import SettingsPanel from "@/components/SettingsPanel";
 
 type Section =
   | "assets"
@@ -50,6 +47,7 @@ const sectionConfig: Record<
       { key: "asset", label: "Asset ID" },
       { key: "name", label: "Name" },
       { key: "category", label: "Category" },
+      { key: "deviceType", label: "Device Type" },
       { key: "assigned", label: "Assigned to" },
       { key: "status", label: "Status" },
     ],
@@ -75,6 +73,10 @@ const sectionConfig: Record<
       { key: "name", label: "Name" },
       { key: "type", label: "Type" },
       { key: "ip_address", label: "IP address" },
+      { key: "mac_address", label: "MAC address" },
+      { key: "brand", label: "Brand" },
+      { key: "model", label: "Model" },
+      { key: "location", label: "Location" },
       { key: "status", label: "Status" },
     ],
   },
@@ -111,6 +113,7 @@ function isSection(value: string): value is Section {
 }
 
 async function getRows(section: Section): Promise<Row[]> {
+  if (section === "settings" || section === "reports") return [];
   await ensureDatabaseSchema();
   if (section === "assets") return getAssets();
   if (section === "employees") return getEmployees();
@@ -131,25 +134,27 @@ function PageHeader({
   count: number;
 }) {
   return (
-    <header className="flex h-[70px] items-center justify-between border-b border-[#e4e8f1] bg-white px-5 lg:px-8">
-      <div className="mx-auto flex w-full max-w-[1460px] items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+    <header className="flex min-h-[64px] items-center border-b border-[#e4e8f1] bg-white/95 pl-16 pr-3 py-3 shadow-[0_1px_0_rgba(30,44,83,.02)] backdrop-blur sm:px-5 lg:h-[60px] lg:min-h-0 lg:px-8 lg:py-0">
+      <div className="mx-auto flex h-full min-h-[44px] w-full max-w-[1800px] items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#eef0ff] text-[#5960f2]">
             <Icon size={16} strokeWidth={2} />
           </span>
-          <div className="hidden text-sm text-[#8c95aa] sm:block">
+          <div className="hidden text-sm text-[#8c95aa] lg:block">
             Workspace <span className="mx-2">/</span>{" "}
             <span className="font-semibold text-[#101a38]">{title}</span>
           </div>
-          <div className="sm:hidden">
-            <div className="text-sm font-semibold">{title}</div>
-            <div className="text-xs text-[#8992a8]">{count} records</div>
+          <div className="min-w-0 lg:hidden">
+            <div className="truncate text-sm font-semibold">{title}</div>
+            <div className="text-xs text-[#8992a8]">
+              {title === "Settings" || title === "Reports" ? "Workspace" : `${count} records`}
+            </div>
           </div>
           <p className="hidden text-xs text-[#8992a8] lg:block">
             {description}
           </p>
         </div>
-              <div className="flex items-center gap-5">
+        <div className="flex shrink-0 items-center gap-3 sm:gap-5">
                 <Suspense fallback={<div className="hidden h-10 w-[300px] md:block" />}>
                   <SearchField />
                 </Suspense>
@@ -192,39 +197,21 @@ export default async function SectionPage({
           Icon={Icon}
           count={rows.length}
         />
-        <div className="mx-auto max-w-[1460px] px-5 py-6 lg:px-8 lg:py-7">
-          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div className="mx-auto max-w-[1800px] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-7">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-4 sm:mb-6">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-[#929aae]">
                 Data overview
               </p>
-              <h2 className="mt-1 font-display text-[28px] font-semibold tracking-[-.04em]">
+              <h2 className="mt-1 font-display text-[26px] font-semibold tracking-[-.04em] sm:text-[28px]">
                 {config.title} records
               </h2>
             </div>
           </div>
           {section === "settings" ? (
-            <div className="panel-shadow rounded-xl border border-[#e4e8f1] bg-white p-6">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#eafaf5] text-[#22a887]">
-                  <Database size={17} />
-                </div>
-                <div>
-                  <h3 className="font-display text-base font-semibold">
-                    Database connection
-                  </h3>
-                  <p className="text-sm text-[#8992a8]">
-                    Your workspace connection is active.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 rounded-lg bg-[#f4fbf8] px-4 py-3 text-xs text-[#27896f]">
-                <CheckCircle2 size={15} /> Connection is ready for live
-                operational data.
-              </div>
-            </div>
+            <SettingsPanel />
           ) : section === "reports" ? (
-            <div className="panel-shadow rounded-xl border border-[#e4e8f1] bg-white p-6">
+            <div className="panel-shadow rounded-xl border border-[#e4e8f1] bg-white p-4 sm:p-6">
               <h3 className="font-display text-base font-semibold">
                 Reports workspace
               </h3>

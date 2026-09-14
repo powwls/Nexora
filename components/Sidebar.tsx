@@ -21,10 +21,11 @@ export default function Sidebar() {
 
   return (
     <>
-      <button className="fixed left-4 top-4 z-20 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
-        <Menu size={19} />
+      <button className="fixed left-3 top-3 z-40 grid h-10 w-10 place-items-center rounded-xl border border-[#dfe4ee] bg-white text-[#5960f2] shadow-[0_6px_18px_rgba(30,44,83,.12)] transition hover:bg-[#f7f7ff] lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
+        <Menu size={19} strokeWidth={2.2} />
       </button>
-      <aside className={`${mobileOpen ? "translate-x-0" : "-translate-x-full"} sidebar-glow fixed inset-y-0 left-0 z-30 flex w-[250px] flex-col px-5 py-6 transition-transform lg:relative lg:translate-x-0`}>
+      {mobileOpen && <button className="fixed inset-0 z-20 bg-[#0e1838]/45 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close navigation overlay" />}
+      <aside className={`${mobileOpen ? "translate-x-0" : "-translate-x-full"} sidebar-glow fixed inset-y-0 left-0 z-30 flex w-[min(280px,calc(100vw-24px))] flex-col px-5 py-6 shadow-[12px_0_35px_rgba(14,24,56,.18)] transition-transform lg:relative lg:w-[250px] lg:translate-x-0 lg:shadow-none`}>
         <div className="mb-9 flex items-center justify-between px-3">
           <NexoraLogo />
           <button className="text-white lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close navigation">

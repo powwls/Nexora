@@ -31,7 +31,7 @@ export default function NotificationBell() {
         aria-label="Open notifications"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="relative text-[#7f89a1] transition-colors hover:text-[#5960f2]"
+        className="relative grid h-9 w-9 place-items-center rounded-xl text-[#7f89a1] transition-colors hover:bg-[#f1f2ff] hover:text-[#5960f2]"
       >
         <Bell size={18} />
         {activities.length > 0 && <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[#ff6e78]" />}

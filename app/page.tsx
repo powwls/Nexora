@@ -176,8 +176,15 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#f5f7fb] lg:flex">
       {/* Left navigation: logo, main menu, settings, and signed-in user. */}
+      {mobileOpen && (
+        <button
+          className="fixed inset-0 z-20 bg-[#0e1838]/45 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close navigation overlay"
+        />
+      )}
       <aside
-        className={`${mobileOpen ? "translate-x-0" : "-translate-x-full"} sidebar-glow fixed inset-y-0 left-0 z-30 flex w-[250px] flex-col px-5 py-6 transition-transform lg:relative lg:translate-x-0`}
+        className={`${mobileOpen ? "translate-x-0" : "-translate-x-full"} sidebar-glow fixed inset-y-0 left-0 z-30 flex w-[min(250px,calc(100vw-32px))] flex-col px-5 py-6 transition-transform lg:relative lg:translate-x-0 lg:w-[250px]`}
       >
         <div className="mb-9 flex items-center justify-between px-3">
           <NexoraLogo />
@@ -215,26 +222,26 @@ export default function Home() {
 
       {/* Main content: top bar, summary cards, charts, and activity. */}
       <section className="min-w-0 flex-1">
-        <header className="flex h-[70px] items-center justify-between border-b border-[#e4e8f1] bg-white px-5 lg:px-8">
-          <div className="mx-auto flex w-full max-w-[1460px] items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+        <header className="flex min-h-[64px] items-center border-b border-[#e4e8f1] bg-white/95 px-3 py-3 shadow-[0_1px_0_rgba(30,44,83,.02)] backdrop-blur sm:px-5 lg:h-[60px] lg:min-h-0 lg:px-8 lg:py-0">
+          <div className="mx-auto flex h-full min-h-[44px] w-full max-w-[1800px] items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
-              className="lg:hidden"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[#dfe4ee] bg-white text-[#5960f2] shadow-sm lg:hidden"
               onClick={() => setMobileOpen(true)}
               aria-label="Open navigation"
             >
               <Menu size={19} />
             </button>
-            <span className="hidden h-8 w-8 place-items-center rounded-lg bg-[#eef0ff] text-[#5960f2] sm:grid">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#eef0ff] text-[#5960f2]">
               <LayoutDashboard size={16} strokeWidth={2} />
             </span>
-            <div className="hidden text-sm text-[#8c95aa] sm:block">
+            <div className="hidden text-sm text-[#8c95aa] lg:block">
               Workspace <span className="mx-2">/</span>{" "}
               <span className="font-semibold text-[#101a38]">Dashboard</span>
             </div>
-            <div className="text-sm font-semibold sm:hidden">Dashboard</div>
+            <div className="truncate text-sm font-semibold lg:hidden">Dashboard</div>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex shrink-0 items-center gap-3 sm:gap-5">
             <Suspense fallback={<div className="hidden h-10 w-[300px] md:block" />}>
               <SearchField value={query} onQueryChange={setQuery} />
             </Suspense>
@@ -245,8 +252,8 @@ export default function Home() {
         </header>
 
         {/* Page heading and dashboard summary cards. */}
-        <div className="mx-auto max-w-[1460px] px-5 py-6 lg:px-8 lg:py-7">
-          <div className="mb-6 flex items-end justify-between">
+        <div className="mx-auto max-w-[1800px] px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-7">
+          <div className="mb-5 flex items-end justify-between sm:mb-6">
             <div>
               <p className="mb-1 text-xs text-[#8c95aa]">
                 <CurrentDateTime />
@@ -254,7 +261,7 @@ export default function Home() {
               <p className="mb-2 text-sm font-medium text-[#5960f2]">
                 Philippine time: <CurrentDateTime compact />
               </p>
-              <h1 className="font-display text-[28px] font-semibold tracking-[-.04em] text-[#101a38]">
+              <h1 className="font-display text-[26px] font-semibold tracking-[-.04em] text-[#101a38] sm:text-[28px]">
                 Dashboard
               </h1>
               <p className="mt-1 text-[12px] text-[#8c95aa]">
@@ -264,7 +271,7 @@ export default function Home() {
           </div>
 
           {/* KPI cards: edit the values and labels in this array. */}
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-5">
             {[
               {
                 label: "Total Assets",
@@ -303,11 +310,11 @@ export default function Home() {
               },
             ].map(({ label, value, change, color, icon: Icon }) => (
               <div
-                className="panel-shadow rounded-lg border border-[#e4e8f1] bg-white p-4"
+                className="panel-shadow rounded-lg border border-[#e4e8f1] bg-white p-3 sm:p-4"
                 key={label}
               >
-                <div className="mb-5 flex items-center justify-between">
-                  <span className="text-sm font-medium text-[#8992a8]">
+                <div className="mb-4 flex items-center justify-between gap-2 sm:mb-5">
+                  <span className="text-xs font-medium text-[#8992a8] sm:text-sm">
                     {label}
                   </span>
                   <span
@@ -318,14 +325,14 @@ export default function Home() {
                   </span>
                 </div>
                 <div className="flex items-end justify-between">
-                  <strong className="font-display text-[25px] font-semibold tracking-[-.06em] text-[#101a38]">
+                  <strong className="font-display text-[23px] font-semibold tracking-[-.06em] text-[#101a38] sm:text-[25px]">
                     {value}
                   </strong>
                   <span className="text-xs font-semibold text-[#24a887]">
                     {change}
                   </span>
                 </div>
-                <div className="mt-2 text-xs text-[#adb3c1]">
+                <div className="mt-2 text-[10px] text-[#adb3c1] sm:text-xs">
                   Current records
                 </div>
               </div>
@@ -333,7 +340,7 @@ export default function Home() {
           </div>
 
           {/* Visual reports: asset status, category breakdown, and department breakdown. */}
-          <div className="mt-5 grid gap-5 xl:grid-cols-3">
+          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <div className="panel-shadow rounded-lg border border-[#e4e8f1] bg-white p-5">
               <div className="mb-4 flex items-start justify-between">
                 <div>
@@ -351,9 +358,9 @@ export default function Home() {
                   ...
                 </button>
               </div>
-              <div className="flex items-center justify-around">
+              <div className="flex flex-col items-center gap-5 sm:flex-row sm:justify-around sm:gap-0">
                 <DonutChart summary={assetSummary} />
-                <div className="space-y-2.5 text-[10px] text-[#768097]">
+                <div className="w-full space-y-2.5 text-[10px] text-[#768097] sm:w-auto">
                   {[
                     { label: "Active", count: assetSummary.active, color: "bg-[#635bfa]" },
                     { label: "Maintenance", count: assetSummary.maintenance, color: "bg-[#40cfb1]" },
@@ -407,7 +414,7 @@ export default function Home() {
                   ...
                 </button>
               </div>
-              <div className="flex items-center justify-around">
+              <div className="flex flex-col items-center gap-5 sm:flex-row sm:justify-around sm:gap-0">
                 <div
                   className="relative grid h-32 w-32 place-items-center rounded-full"
                   style={{
@@ -416,7 +423,7 @@ export default function Home() {
                 >
                   <div className="h-20 w-20 rounded-full bg-white" />
                 </div>
-                <div className="space-y-2.5 text-[10px] text-[#768097]">
+                <div className="w-full space-y-2.5 text-[10px] text-[#768097] sm:w-auto">
                   {departments.slice(0, 4).map((department, index) => (
                     <div key={department.label}>
                       <span
@@ -448,7 +455,21 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="overflow-x-auto">
+              <div className="divide-y divide-[#edf0f5] sm:hidden">
+                {visibleRows.slice(0, 4).map((row, index) => (
+                  <article className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 px-4 py-3" key={row.id}>
+                    <strong className="truncate text-xs font-semibold text-[#36415d]">
+                      {["John Francis", "Maria Santos", "System", "Ramon Garcia"][index]}
+                    </strong>
+                    <span className="text-right text-[10px] text-[#9ba3b4]">{row.updated}</span>
+                    <span className="truncate text-[11px] text-[#68738d]">
+                      {["Added new asset", "Updated asset information", "Device network maintenance", "Assigned device"][index]}
+                    </span>
+                    <span className="truncate text-right text-[11px] font-medium text-[#5960f2]">{row.workspace}</span>
+                  </article>
+                ))}
+              </div>
+              <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full min-w-[600px] text-left">
                   <thead className="bg-[#fbfcfe] text-[8px] font-semibold uppercase tracking-[.1em] text-[#a0a8b9]">
                     <tr>

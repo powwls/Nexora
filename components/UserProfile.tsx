@@ -51,7 +51,7 @@ export default function UserProfile() {
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="Open profile menu"
-        className="flex items-center gap-2.5 text-left"
+        className="flex items-center gap-2 rounded-xl px-1.5 py-1 text-left transition-colors hover:bg-[#f7f8fc]"
         onClick={() => setOpen((value) => !value)}
       >
         <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#ffc5b3] to-[#f08a83] text-[10px] font-bold text-[#873f43]">

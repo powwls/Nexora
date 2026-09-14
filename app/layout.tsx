@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
@@ -11,6 +11,12 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Nexora | Operations intelligence",
   description: "A clear view of your most important operational signals.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

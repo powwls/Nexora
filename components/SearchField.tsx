@@ -23,7 +23,7 @@ export default function SearchField({
   }
 
   return (
-    <label className="hidden h-10 w-[300px] items-center gap-2.5 rounded-lg border border-[#dfe4ee] bg-[#fafbfe] px-3.5 text-xs text-[#a0a8bb] md:flex">
+    <label className="hidden h-9 w-[280px] items-center gap-2.5 rounded-xl border border-[#dfe4ee] bg-[#fafbfe] px-3.5 text-xs text-[#a0a8bb] shadow-sm transition-colors focus-within:border-[#bfc6ff] focus-within:bg-white lg:flex">
       <Search size={16} />
       <input
         aria-label="Search records"

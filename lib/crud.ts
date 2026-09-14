@@ -2,30 +2,50 @@ import { getPool, syncMaintenanceRecords } from "@/lib/db";
 
 export type CrudResource = "assets" | "employees" | "network-devices" | "maintenance";
 
+async function syncAssetStatusForMaintenance(database = getPool(), assetId: string) {
+  const activeMaintenance = await database.query<{ total: number }>(
+    `SELECT COUNT(*)::int AS total
+     FROM maintenance
+     WHERE asset = $1 AND LOWER(status) <> 'completed'`,
+    [assetId],
+  );
+
+  await database.query(
+    `UPDATE assets
+     SET status = $1
+     WHERE asset = $2`,
+    [activeMaintenance.rows[0]?.total ? "Maintenance" : "Active", assetId],
+  );
+}
+
 const resourceConfig = {
   assets: {
     table: "assets",
     key: "asset",
     prefix: "IT-",
-    fields: ["asset", "name", "category", "assigned", "status"],
+    fields: ["asset", "name", "category", "deviceType", "assigned", "status"],
+    optionalFields: [],
   },
   employees: {
     table: "employees",
     key: "id",
     prefix: "emp_",
     fields: ["id", "name", "department", "role", "email", "status"],
+    optionalFields: [],
   },
   "network-devices": {
     table: "network_devices",
     key: "id",
     prefix: "net_",
-    fields: ["id", "name", "type", "ip_address", "status"],
+    fields: ["id", "name", "type", "ip_address", "mac_address", "brand", "model", "location", "status"],
+    optionalFields: ["mac_address", "brand", "model", "location"],
   },
   maintenance: {
     table: "maintenance",
     key: "id",
     prefix: "mnt_",
     fields: ["id", "asset", "issue", "technician", "status", "scheduled"],
+    optionalFields: [],
   },
 } as const;
 
@@ -37,13 +57,46 @@ function getConfig(resource: CrudResource) {
   return resourceConfig[resource];
 }
 
+function normalizeAssetValues(values: Record<string, string>) {
+  const category = String(values.category ?? "");
+  const deviceType = String(values.deviceType ?? "").trim();
+
+  if (!category) return values;
+
+  if (!deviceType) {
+    values.deviceType = "Standard";
+    return values;
+  }
+
+  values.deviceType = deviceType;
+  return values;
+}
+
 function validatePayload(resource: CrudResource, payload: Record<string, unknown>, includeKey = true) {
   const config = getConfig(resource);
   const fields = includeKey ? config.fields : config.fields.filter((field) => field !== config.key);
   const values = fields.map((field) => [field, payload[field]] as const);
-  const missing = values.find(([, value]) => value === undefined || value === "");
+  const missing = values.find(([field, value]) =>
+    !config.optionalFields?.includes(field as never) && (value === undefined || value === ""),
+  );
   if (missing) throw new Error(`Missing required field: ${missing[0]}`);
-  return Object.fromEntries(values.map(([field, value]) => [field, String(value)]));
+  const normalized = Object.fromEntries(values.map(([field, value]) => [field, String(value)]));
+  const allowedValues: Record<string, string[]> = resource === "assets"
+    ? { status: ["Active", "Maintenance", "Available", "Retired"] }
+    : resource === "employees"
+      ? { status: ["Active", "Inactive"] }
+      : resource === "network-devices"
+        ? {
+            type: ["Router", "Switch", "Firewall", "Access Point", "Other"],
+            status: ["Online", "Offline", "Maintenance", "Unknown"],
+          }
+        : { status: ["Pending", "In Progress", "Completed"] };
+  for (const [field, options] of Object.entries(allowedValues)) {
+    if (normalized[field] && !options.includes(normalized[field])) {
+      throw new Error(`Invalid ${field}. Choose one of: ${options.join(", ")}.`);
+    }
+  }
+  return resource === "assets" ? normalizeAssetValues(normalized) : normalized;
 }
 
 export async function createRecord(resource: CrudResource, payload: Record<string, unknown>) {
@@ -68,6 +121,18 @@ export async function createRecord(resource: CrudResource, payload: Record<strin
   if (resource === "assets" && values.status?.toLowerCase() === "maintenance") {
     await syncMaintenanceRecords(database);
   }
+  if (resource === "maintenance") {
+    const assetId = String(values.asset ?? "");
+    if (assetId) {
+      const status = String(values.status ?? "Pending").toLowerCase();
+      await database.query(
+        `UPDATE assets
+         SET status = $1
+         WHERE asset = $2`,
+        [status === "completed" ? "Active" : "Maintenance", assetId],
+      );
+    }
+  }
   return result.rows[0];
 }
 
@@ -80,8 +145,8 @@ export async function updateRecord(
   const database = getPool();
   const values = validatePayload(resource, payload, false);
   if (resource === "maintenance") {
-    const current = await database.query<{ status: string }>(
-      "SELECT status FROM maintenance WHERE id = $1",
+    const current = await database.query<{ status: string; asset: string }>(
+      "SELECT status, asset FROM maintenance WHERE id = $1",
       [keyValue],
     );
     if (current.rows[0]?.status.toLowerCase() === "completed" && values.status.toLowerCase() !== "completed") {
@@ -100,13 +165,14 @@ export async function updateRecord(
     await syncMaintenanceRecords(database);
   }
   if (resource === "maintenance") {
-    const maintenanceStatus = values.status.toLowerCase();
-    const assetStatus = maintenanceStatus === "completed" ? "Active" : "Maintenance";
-    await database.query(
-      `UPDATE assets SET status = $1
-       WHERE asset = (SELECT asset FROM maintenance WHERE id = $2)`,
-      [assetStatus, keyValue],
-    );
+    const assetId = String(payload.asset ?? "");
+    const maintenanceStatus = String(values.status ?? "Pending").toLowerCase();
+    if (assetId) {
+      await database.query(
+        `UPDATE assets SET status = $1 WHERE asset = $2`,
+        [maintenanceStatus === "completed" ? "Active" : "Maintenance", assetId],
+      );
+    }
     await database.query(
       maintenanceStatus === "completed"
         ? "UPDATE maintenance SET date_completed = CURRENT_DATE WHERE id = $1"
@@ -119,7 +185,25 @@ export async function updateRecord(
 
 export async function deleteRecord(resource: CrudResource, keyValue: string) {
   const config = getConfig(resource);
-  const result = await getPool().query(
+  const database = getPool();
+
+  if (resource === "maintenance") {
+    const assetResult = await database.query<{ asset: string }>(
+      "SELECT asset FROM maintenance WHERE id = $1",
+      [keyValue],
+    );
+    const assetId = assetResult.rows[0]?.asset;
+    const result = await database.query(
+      `DELETE FROM ${config.table} WHERE ${config.key} = $1 RETURNING ${config.key}`,
+      [keyValue],
+    );
+    if (result.rowCount === 1 && assetId) {
+      await syncAssetStatusForMaintenance(database, assetId);
+    }
+    return result.rowCount === 1;
+  }
+
+  const result = await database.query(
     `DELETE FROM ${config.table} WHERE ${config.key} = $1 RETURNING ${config.key}`,
     [keyValue],
   );

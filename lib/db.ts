@@ -25,6 +25,7 @@ export type Asset = {
   asset: string;
   name: string;
   category: string;
+  deviceType?: string;
   assigned: string;
   status: string;
 };
@@ -43,6 +44,10 @@ export type NetworkDevice = {
   name: string;
   type: string;
   ip_address: string;
+  mac_address?: string;
+  brand?: string;
+  model?: string;
+  location?: string;
   status: string;
 };
 
@@ -82,6 +87,7 @@ export async function ensureDatabaseSchema(syncMaintenance = true) {
       asset TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       category TEXT NOT NULL,
+      "deviceType" TEXT NOT NULL DEFAULT 'Standard',
       assigned TEXT NOT NULL,
       status TEXT NOT NULL DEFAULT 'Active'
     );
@@ -98,6 +104,10 @@ export async function ensureDatabaseSchema(syncMaintenance = true) {
       name TEXT NOT NULL,
       type TEXT NOT NULL,
       ip_address TEXT NOT NULL,
+      mac_address TEXT NOT NULL DEFAULT '',
+      brand TEXT NOT NULL DEFAULT '',
+      model TEXT NOT NULL DEFAULT '',
+      location TEXT NOT NULL DEFAULT '',
       status TEXT NOT NULL DEFAULT 'Online'
     );
     CREATE TABLE IF NOT EXISTS maintenance (
@@ -109,6 +119,16 @@ export async function ensureDatabaseSchema(syncMaintenance = true) {
       scheduled DATE NOT NULL,
       date_completed DATE
     );
+  `);
+  await database.query(`ALTER TABLE network_devices ADD COLUMN IF NOT EXISTS mac_address TEXT NOT NULL DEFAULT ''`);
+  await database.query(`ALTER TABLE network_devices ADD COLUMN IF NOT EXISTS brand TEXT NOT NULL DEFAULT ''`);
+  await database.query(`ALTER TABLE network_devices ADD COLUMN IF NOT EXISTS model TEXT NOT NULL DEFAULT ''`);
+  await database.query(`ALTER TABLE network_devices ADD COLUMN IF NOT EXISTS location TEXT NOT NULL DEFAULT ''`);
+  await database.query(`ALTER TABLE assets ADD COLUMN IF NOT EXISTS "deviceType" TEXT`);
+  await database.query(`
+    UPDATE assets
+    SET "deviceType" = 'Standard'
+    WHERE "deviceType" IS NULL OR "deviceType" = ''
   `);
   await database.query(`ALTER TABLE maintenance ADD COLUMN IF NOT EXISTS date_completed DATE`);
   await database.query(`
@@ -203,7 +223,8 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
 
 export async function getAssets(): Promise<Asset[]> {
   const result = await getPool().query<Asset>(
-    "SELECT asset, name, category, assigned, status FROM assets ORDER BY asset",
+    `SELECT asset, name, category, COALESCE("deviceType", 'Standard') AS "deviceType", assigned, status
+     FROM assets ORDER BY asset`,
   );
   return result.rows;
 }
@@ -217,7 +238,7 @@ export async function getEmployees(): Promise<Employee[]> {
 
 export async function getNetworkDevices(): Promise<NetworkDevice[]> {
   const result = await getPool().query<NetworkDevice>(
-    "SELECT id, name, type, ip_address, status FROM network_devices ORDER BY id",
+    "SELECT id, name, type, ip_address, mac_address, brand, model, location, status FROM network_devices ORDER BY id",
   );
   return result.rows;
 }
