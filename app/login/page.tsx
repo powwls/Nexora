@@ -33,9 +33,10 @@ function LoginForm() {
   return (
     <main className="grid min-h-screen bg-[#f5f7fb] lg:grid-cols-[minmax(360px,0.9fr)_1.1fr]">
       <section className="relative hidden overflow-hidden bg-[#0e1838] p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div className="relative z-10 flex items-center gap-3">
-          <span className="logo-mark grid h-10 w-10 place-items-center rounded-xl text-base font-bold">N</span>
-          <span className="font-display text-lg font-bold tracking-[.22em]">NEXORA</span>
+        <div className="relative z-10 flex items-center">
+          <span className="font-display text-[22px] font-bold tracking-[0.22em] text-white">
+            NEXORA
+          </span>
         </div>
         <div className="relative z-10 max-w-md">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[.2em] text-[#8f9bca]">Operations intelligence</p>
@@ -47,8 +48,14 @@ function LoginForm() {
       </section>
       <section className="flex items-center justify-center px-5 py-10 sm:px-8">
         <div className="w-full max-w-[420px]">
-          <div className="mb-8 lg:hidden"><span className="logo-mark inline-grid h-10 w-10 place-items-center rounded-xl font-bold">N</span></div>
-          <div className="mb-8"><div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef0ff] text-[#5960f2]"><ShieldCheck size={20} /></div><p className="mb-2 text-xs font-semibold uppercase tracking-[.16em] text-[#8e98ae]">Welcome back</p><h2 className="font-display text-3xl font-semibold tracking-[-.04em] text-[#101a38]">Sign in to Nexora</h2><p className="mt-2 text-sm text-[#8a94aa]">Use your administrator account to continue.</p></div>
+          <div className="mb-8">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef0ff] text-[#5960f2]">
+              <ShieldCheck size={20} />
+            </div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[.16em] text-[#8e98ae]">Welcome back</p>
+            <h2 className="font-display text-3xl font-semibold tracking-[-.04em] text-[#101a38]">Sign in to Nexora</h2>
+            <p className="mt-2 text-sm text-[#8a94aa]">Use your administrator account to continue.</p>
+          </div>
           <form onSubmit={submit} className="space-y-4 rounded-2xl border border-[#e4e8f1] bg-white p-6 shadow-[0_18px_50px_rgba(30,44,83,.08)]">
             <label className="block text-xs font-semibold text-[#4f5b78]">Email<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 h-11 w-full rounded-lg border border-[#dfe4ee] px-3 text-sm font-normal text-[#101a38] outline-none transition focus:border-[#5960f2] focus:ring-4 focus:ring-[#5960f2]/10" /></label>
             <label className="block text-xs font-semibold text-[#4f5b78]">Password<div className="relative mt-2"><LockKeyhole className="absolute left-3 top-3 text-[#a0a8bb]" size={16} /><input required type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="h-11 w-full rounded-lg border border-[#dfe4ee] pl-10 pr-3 text-sm font-normal text-[#101a38] outline-none transition focus:border-[#5960f2] focus:ring-4 focus:ring-[#5960f2]/10" /></div></label>
